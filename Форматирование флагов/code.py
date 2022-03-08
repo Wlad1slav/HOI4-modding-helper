@@ -18,15 +18,16 @@ def formater():
         images = filter(lambda x: x.endswith('.tga'), files) 
 
         for name in images:
-            print('.', end='')
             try:
                 flag = Image.open(f"{directory}\{name}")
 
-                flag.thumbnail((41, 26))
+                flag = flag.resize((41, 26), Image.ANTIALIAS)
                 flag.save(f"{directory}\medium\{name}")
 
-                flag.thumbnail((10, 7))
+                flag = flag.resize((10, 7), Image.ANTIALIAS)
                 flag.save(f"{directory}\small\{name}")
+
+                print('.', end='')
             except:
                 print(f"{Fore.RED}Ошибка при открытии или форматировании {name}")
                 try: errors+=1
