@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Супер ивент</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main">
+
+        <div class="bg"><img src="" id="img_bg" width:573 height:397 /></div>
+        <div class="window"><img src="sprites/template.png" /></div>
+        
+        <div class="title" contenteditable="true" spellcheck="false">Борис Немцов - наш президент</div>
+        <div class="info" contenteditable="true" spellcheck="false">"В моём глубоком детстве Ельцин хотел видеть меня преемником, а потом передумал и сделал Путина. Это было его главной ошибкой. Но мы её исправили и я наконец опять могу выступать по телевизору"
+        - Борис Немцов во время своей инаугурации</div>
+        <div class="button" contenteditable="true" spellcheck="false">Россия в надёжных руках</div>
+
+    </div>
+
+    <div class="select-bg">
+        Путь к картинке: <input type="file" onchange="save()" id="file_bg"/>
+    </div>
+
+    <script>
+        
+        function save() {
+            let f = file_bg.files[0];
+            if(f) {
+                img_bg.src = URL.createObjectURL(f);
+                localStorage.setItem('bg', img_bg.src);
+            }
+
+            img_bg.src = localStorage.getItem('bg');
+            console.log("saved");
+        }
+
+    </script>
+
+</body>
