@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOR: Создание армии</title>
+</head>
+<body>
+    <textarea name="res" id="result" cols="170" rows="10"></textarea>
+    <br> <br>
+    <!-- <button onclick="newTemplate()">Новый шаблон</button> -->
+    <button id="div-plus" onclick="createDiv()">+</button> <br>
+    division = { <br>
+        name = "<input type="text" id="div-name" value="Бригада" oninput="unblockCreateDiv()">" <br>
+        location = <input type="number" id="div-loc" value="1000" oninput="unblockCreateDiv()"> <br>
+        division_template = "<select id="div-template-select" oninput="unblockCreateDiv()"> <option value="None">-</option> </select>" <br>
+        start_experience_factor = <input type="number" id="div-exp" value="0" oninput="unblockCreateDiv()"> start_equipment_factor = <input type="number" id="div-eq" value="0.7" oninput="unblockCreateDiv()"> <br>
+    }
+
+    <script>
+        var batalions_types = [
+            "None", // Пусто
+            "mech_mechanized_BTR_bat",
+            "mech_mechanized_BMP_bat",
+            "mech_tank_bat",
+            "mech_selfpropelled_artillery_bat",
+            "mech_airborne_bat",
+            "mech_marine_bat",
+            "mech_selfpropelled_antiair_bat",
+
+            "inf_infantry_bat",
+            "inf_motorized_infantry_bat",
+            "inf_vdv_bat",
+            "inf_marine_bat",
+            "inf_mountineer_bat",
+            "inf_artillery_bat",
+            "inf_recon_bat",
+            "inf_engeener_bat",
+
+            "special_operational_bat",
+            "special_militia_bat",
+            "special_nationalists_bat"
+        ]
+        var company_types = [
+            "None",
+            "comp_tank",
+            "comp_recon",
+            "comp_engeener",
+            "comp_artillery",
+            "comp_anti_air",
+            "comp_sp_art"
+        ]
+        function battalionName(battalion, group = "battalion") {
+            if(battalion == "None") { return "-" }
+            else if(group == "battalion") {
+                if(battalion == "mech_mechanized_BTR_bat") { return "БТР" }
+                else if(battalion == "mech_mechanized_BMP_bat") { return "БМП" }
+                else if(battalion == "mech_tank_bat") { return "Танк" }
+                else if(battalion == "mech_selfpropelled_artillery_bat") { return "СХ Арта" }
+                else if(battalion == "mech_airborne_bat") { return "Мех. ВДВ" }
+                else if(battalion == "mech_marine_bat") { return "Мех. морпех" }
+                else if(battalion == "mech_selfpropelled_antiair_bat") { return "Зенитка" }
+
+                else if(battalion == "inf_infantry_bat") { return "Мясо" }
+                else if(battalion == "inf_motorized_infantry_bat") { return "Машинка" }
+                else if(battalion == "inf_vdv_bat") { return "ВДВ" }
+                else if(battalion == "inf_marine_bat") { return "Морпех" }
+                else if(battalion == "inf_mountineer_bat") { return "Горняк" }
+                else if(battalion == "inf_artillery_bat") { return "Арта" }
+                else if(battalion == "inf_recon_bat") { return "Разведка" }
+                else if(battalion == "inf_engeener_bat") { return "Инженер" }
+
+                else if(battalion == "special_operational_bat") { return "Спецназ" }
+                else if(battalion == "special_militia_bat") { return "Ополчение" }
+                else if(battalion == "special_nationalists_bat") { return "Фашызды" }
+
+                else { return "Error" }
+            }
+            else if(group == "support") {
+                if(battalion == "comp_tank") { return "р. Танк" }
+                else if(battalion == "comp_recon") { return "Разведрота" }
+                else if(battalion == "comp_engeener") { return "Инжрота" }
+                else if(battalion == "comp_artillery") { return "Артрота" }
+                else if(battalion == "comp_anti_air") { return "Зенитрота" }
+                else if(battalion == "comp_sp_art") { return "р. СХ Арта" }
+
+                else { return "Error" }
+            }
+
+        }
+        function br(times = "0") {
+            for(var time = 0; time <= times; time++) {
+                var br = document.createElement('br'); document.body.appendChild(br);
+            }
+        }
+        function templateName(num = String(template_number)) {
+            var template_name = document.createElement('input')
+            template_name.id = num + '. template-name'
+            document.body.appendChild(template_name)
+
+            // var enable = document.createElement('text')
+            // enable.innerHTML = "Не существует"
+            // document.body.appendChild(enable)
+        }
+        function createBattalionSelect(num, x, y, group = "battalion") {
+            var battaion_select = document.createElement('select')
+            if(group == "battalion") battaion_select.id = String(template_number) + '. battalion-select ' + "x: " + String(x) + " | y: " + String(y)
+            else if(group == "support") battaion_select.id = String(template_number) + '. company-select ' + "x: " + String(x) + " | y: " + String(y)
+            battaion_select.setAttribute("onclick", "blockCells()")
+
+            document.body.appendChild(battaion_select)
+        }
+        function btnTemplateSave(num = String(template_number)) {
+            var template_save_button = document.createElement('button')
+            template_save_button.id = num + '. save-button'
+            template_save_button.setAttribute("onclick", "templateCreate()")
+            template_save_button.innerHTML = "Сохранить шаблон"
+            document.body.appendChild(template_save_button)
+        }
+        function blockCells() {
+            for(var temp_num = 1; temp_num <= template_number; temp_num++) {
+
+                for(var x = 0; x <= 4; x++) { // batts
+                    for(var y = 0; y <= 4; y++) {
+                        battalion_cell = document.getElementById(String(template_number) + '. battalion-select ' + "x: " + String(x) + " | y: " + String(y))
+                        // console.log(battalion_cell.id[23], battalion_cell.id[30])
+                        if(y != 0) {
+                            cell = document.getElementById(String(template_number) + '. battalion-select ' + "x: " + String(x) + " | y: " + String(y-1))
+                            if(cell.value == "None") { battalion_cell.disabled = true }
+                            else { battalion_cell.disabled = false }
+                        }
+                        else if(x != 0) {
+                            cell = document.getElementById(String(template_number) + '. battalion-select ' + "x: " + String(x-1) + " | y: " + String(y))
+                            if(cell.value == "None") { battalion_cell.disabled = true }
+                            else { battalion_cell.disabled = false }
+                        }
+                    }
+                }
+
+                for(var y = 0; y <= 4; y++) { // support
+                    company_cell = document.getElementById(String(template_number) + '. company-select ' + "x: 0" + " | y: " + String(y))
+                    if(y != 0) {
+                        cell = document.getElementById(String(template_number) + '. company-select ' + "x: 0" + " | y: " + String(y-1))
+                        if(cell.value == "None") { company_cell.disabled = true } else { company_cell.disabled = false }
+                    }
+                }
+            }
+        }
+        function TEMPLATE(battalions, support, template_name = "Noname") {
+            if (template_name == "") template_name = "Noname"
+
+            var template_option = document.createElement('option')
+            template_option.value = template_name
+            template_option.innerHTML = template_name
+
+            document.getElementById("div-template-select").appendChild(template_option)
+
+            if(battalions != "") { // возвращает в templateCreate()
+                return `
+division_template = {
+	name = "${template_name}"
+	division_names_group = AAA_AAA_01
+
+	regiments = {
+	    ${battalions}
+	}
+	support = {
+	    ${support}
+	}
+}
+            `
+            } else return ""
+
+        }
+        templates = ""
+        function templateCreate() {
+            for (var temp_num = 1; temp_num <= template_number; temp_num++) {
+                batts = ""; sup = "";
+                for(var x = 0; x <= 4; x++) {
+                    for(var y = 0; y <= 4; y++) {
+                        battalion_cell = document.getElementById(String(temp_num) + '. battalion-select ' + "x: " + String(x) + " | y: " + String(y))
+                        temp_name = document.getElementById(String(temp_num) + '. template-name')
+                        
+                        if(battalion_cell.value != "None") batts += `${battalion_cell.value} = { x = ${x} y = ${y} }\n            `
+                    }
+                }
+                for(var y = 0; y <= 4; y++) {
+                    company_cell = document.getElementById(String(temp_num) + '. company-select ' + "x: 0" + " | y: " + String(y))
+                    if(company_cell.value != "None") sup += `${company_cell.value} = { x = 0 y = ${y} }\n            `
+                }
+                templates += TEMPLATE(batts, sup, temp_name.value)
+                document.getElementById("result").value = templates
+                document.getElementById("result").value += "\nunits = {\n\n"
+                document.getElementById("result").value += divisions
+                document.getElementById("result").value += "\n\n}"
+
+            }
+        }
+        function unblockCreateDiv() {
+            console.log("+")
+            if(
+                document.getElementById("div-name").value.replace(/\s/g, '') != "" &&
+                document.getElementById("div-loc").value.replace(/\s/g, '') != "" &&
+                document.getElementById("div-template-select").value != "None" &&
+                document.getElementById("div-exp").value.replace(/\s/g, '') != "" &&
+                document.getElementById("div-eq").value.replace(/\s/g, '') != "" &&
+                document.getElementById("div-exp").value >= 0 &&
+                document.getElementById("div-eq").value >= 0 &&
+                document.getElementById("div-exp").value <= 1 &&
+                document.getElementById("div-eq").value <= 1
+                ) {
+                    document.getElementById("div-plus").disabled = false
+                } else document.getElementById("div-plus").disabled = true
+        }
+        function createDiv() {
+            div = `division = { name = "${document.getElementById("div-name").value}" location = ${document.getElementById("div-loc").value} division_template = "${document.getElementById("div-template-select").value}" start_experience_factor = ${document.getElementById("div-exp").value} start_equipment_factor = ${document.getElementById("div-eq").value} }\n`
+            divisions += div
+
+            document.getElementById("result").value = templates
+            document.getElementById("result").value += "\nunits = {\n\n"
+            document.getElementById("result").value += divisions
+            document.getElementById("result").value += "\n}"
+        }
+
+        var template_number = 0
+        divisions = ""
+        newTemplate()
+        document.getElementById("div-plus").disabled = true
+
+        function newTemplate() {
+            br(2)
+            template_number++
+            templateName()
+            br()
+
+            cells()
+            function cells() {
+                // console.log("Создаю ячейки для шаблонов...")
+
+                for(var y = 0; y <= 4; y++) { // создание <select>-ов
+                    for(var x = 0; x <= 4; x++) {
+                        // console.log(x, y)
+
+                        createBattalionSelect(template_number, x, y)
+                    }
+                    br()
+                }
+            }
+            for(var x = 0; x <= 4; x++) { // добавленеи <option> для <select>-ов
+                for(var y = 0; y <= 4; y++) {
+                    battaion_select_types = document.getElementById(String(template_number) + '. battalion-select ' + "x: " + String(x) + " | y: " + String(y))
+                    
+                    batalions_types.forEach(battalion => {
+                        var battaion_option = document.createElement('option')
+                        battaion_option.value = battalion
+                        battaion_option.innerHTML = battalionName(battalion)
+
+                        battaion_select_types.appendChild(battaion_option)
+                    });
+                }
+            }
+            br()
+
+            for(var y = 0; y <= 4; y++) { createBattalionSelect(template_number, 0, y, "support") }
+
+            for(var y = 0; y <= 4; y++) {
+                company_select_types = document.getElementById(String(template_number) + '. company-select ' + "x: 0" + " | y: " + String(y))
+
+                company_types.forEach(company => {
+                    var company_option = document.createElement('option')
+                    company_option.value = company
+                    company_option.innerHTML = battalionName(company, "support")
+
+                    company_select_types.appendChild(company_option)
+                })
+                
+            }
+
+            br(1)
+
+            btnTemplateSave()
+            blockCells()
+        }
+            
+
+    </script>
+</body>
+</html>
