@@ -127,12 +127,12 @@
                         // console.log(battalion_cell.id[23], battalion_cell.id[30])
                         if(y != 0) {
                             cell = document.getElementById(String(template_number) + '. battalion-select ' + "x: " + String(x) + " | y: " + String(y-1))
-                            if(cell.value == "None") { battalion_cell.disabled = true }
+                            if(cell.value == "None") { battalion_cell.disabled = true; battalion_cell.value = "None" }
                             else { battalion_cell.disabled = false }
                         }
                         else if(x != 0) {
                             cell = document.getElementById(String(template_number) + '. battalion-select ' + "x: " + String(x-1) + " | y: " + String(y))
-                            if(cell.value == "None") { battalion_cell.disabled = true }
+                            if(cell.value == "None") { battalion_cell.disabled = true; battalion_cell.value = "None" }
                             else { battalion_cell.disabled = false }
                         }
                     }
@@ -142,7 +142,7 @@
                     company_cell = document.getElementById(String(template_number) + '. company-select ' + "x: 0" + " | y: " + String(y))
                     if(y != 0) {
                         cell = document.getElementById(String(template_number) + '. company-select ' + "x: 0" + " | y: " + String(y-1))
-                        if(cell.value == "None") { company_cell.disabled = true } else { company_cell.disabled = false }
+                        if(cell.value == "None") { company_cell.disabled = true; company_cell.value = "None" } else { company_cell.disabled = false }
                     }
                 }
             }
